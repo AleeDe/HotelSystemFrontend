@@ -12,7 +12,8 @@ const ProfilePage = () => {
             try {
                 const response = await ApiService.getUserProfile();
                 // Fetch user bookings using the fetched user ID
-                const userPlusBookings = await ApiService.getUserBookings(response.user.id);
+                const userPlusBookings = await ApiService.getUserBookings(response.user.stringId);
+                console.log(userPlusBookings)
                 setUser(userPlusBookings.user)
             } catch (error) {
                 setError(error.response?.data?.message || error.message);
@@ -67,6 +68,7 @@ const ProfilePage = () => {
                                 <p className="mb-2"><strong>Check-out Date:</strong> {booking.checkOutDate}</p>
                                 <p className="mb-2"><strong>Total Guests:</strong> {booking.totalNumOfGuest}</p>
                                 <p className="mb-2"><strong>Room Type:</strong> {booking.room.roomType}</p>
+                                <p className="mb-2"><strong>Room Price:</strong> ${booking.room.roomPrice}</p>
                                 <img
                                     src={booking.room.roomPhotoUrl}
                                     alt="Room"

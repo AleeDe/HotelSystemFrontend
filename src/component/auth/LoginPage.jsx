@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import ApiService from "../../service/ApiService";
+import {toast} from "react-toastify"
 
 function LoginPage() {
     const [email, setEmail] = useState('');
@@ -8,6 +9,7 @@ function LoginPage() {
     const [error, setError] = useState('');
     const navigate = useNavigate();
     const location = useLocation();
+    
 
     const from = location.state?.from?.pathname || '/home';
 
@@ -23,12 +25,18 @@ function LoginPage() {
         try {
             const response = await ApiService.loginUser({ email, password });
             if (response.statusCode === 200) {
+                toast.success("Login Successful!");
                 localStorage.setItem('token', response.token);
                 localStorage.setItem('role', response.role);
                 navigate(from, { replace: true });
             }
         } catch (error) {
-            setError(error.response?.data?.message || error.message);
+            if(error.response && error.response.status === 500){
+            toast.error("Invalid email and password!");
+            }
+            else{
+                toast.error("Network Error");
+            }
             setTimeout(() => setError(''), 5000);
         }
     };
@@ -66,7 +74,7 @@ function LoginPage() {
                 </button>
             </form>
             <p className="text-center mt-4">
-                Don't have an account? <a href="/register" className="text-teal-600 hover:underline">Register</a>
+                Don't have an account? <Link to="/register" className="text-teal-600 hover:underline">Register</Link>
             </p>
         </div>
     );

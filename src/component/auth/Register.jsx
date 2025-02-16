@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import ApiService from '../../service/ApiService';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+import {toast} from "react-toastify"
 
 function RegisterPage() {
     const navigate = useNavigate();
@@ -40,7 +41,8 @@ function RegisterPage() {
             const response = await ApiService.registerUser(formData);
 
             // Check if the response is successful
-            if (response.statusCode === 200) {
+            if (response.statusCode === 201) {
+                
                 // Clear the form fields after successful registration
                 setFormData({
                     name: '',
@@ -48,14 +50,21 @@ function RegisterPage() {
                     password: '',
                     phoneNumber: ''
                 });
-                setSuccessMessage('User registered successfully');
+                toast.success("User registered successfully");
                 setTimeout(() => {
                     setSuccessMessage('');
-                    navigate('/');
+                    navigate('/home');
                 }, 3000);
             }
         } catch (error) {
-            setErrorMessage(error.response?.data?.message || error.message);
+            console.log(error)
+            if(error.response && error.response.status === 409){
+                toast.warn("email already exist");
+            }
+            else{
+                toast.error("Network Error");
+            }
+
             setTimeout(() => setErrorMessage(''), 5000);
         }
     };
@@ -118,7 +127,7 @@ function RegisterPage() {
                 </button>
             </form>
             <p className="text-center mt-4">
-                Already have an account? <a href="/login" className="text-teal-600 hover:underline">Login</a>
+                Already have an account? <Link to="/login" className="text-teal-600 hover:underline">Login</Link>
             </p>
         </div>
     );

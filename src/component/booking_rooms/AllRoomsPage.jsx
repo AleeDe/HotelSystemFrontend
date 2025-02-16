@@ -1,4 +1,8 @@
+'use client';
+
 import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { DollarSign, Loader, Filter, Search } from 'lucide-react';
 import ApiService from '../../service/ApiService';
 import Pagination from '../common/Pagination';
 import RoomResult from '../home/RoomResult';
@@ -11,82 +15,91 @@ const AllRoomsPage = () => {
   const [selectedRoomType, setSelectedRoomType] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [roomsPerPage] = useState(5);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Function to handle search results
   const handleSearchResult = (results) => {
     setRooms(results);
     setFilteredRooms(results);
   };
 
   useEffect(() => {
-    const fetchRooms = async () => {
+    const fetchData = async () => {
+      setIsLoading(true);
       try {
-        const response = await ApiService.getAllRooms();
-        const allRooms = response.roomList;
-        setRooms(allRooms);
-        setFilteredRooms(allRooms);
+        const [roomsResponse, typesResponse] = await Promise.all([
+          ApiService.getAllRooms(),
+          ApiService.getRoomTypes()
+        ]);
+        setRooms(roomsResponse.roomList);
+        setFilteredRooms(roomsResponse.roomList);
+        setRoomTypes(typesResponse);
       } catch (error) {
-        console.error('Error fetching rooms:', error.message);
+        console.error('Error fetching data:', error.message);
       }
+      setIsLoading(false);
     };
 
-    const fetchRoomTypes = async () => {
-      try {
-        const types = await ApiService.getRoomTypes();
-        setRoomTypes(types);
-      } catch (error) {
-        console.error('Error fetching room types:', error.message);
-      }
-    };
-
-    fetchRooms();
-    fetchRoomTypes();
+    fetchData();
   }, []);
 
   const handleRoomTypeChange = (e) => {
-    setSelectedRoomType(e.target.value);
-    filterRooms(e.target.value);
+    const type = e.target.value;
+    setSelectedRoomType(type);
+    setFilteredRooms(type === '' ? rooms : rooms.filter(room => room.roomType === type));
+    setCurrentPage(1);
   };
 
-  const filterRooms = (type) => {
-    if (type === '') {
-      setFilteredRooms(rooms);
-    } else {
-      const filtered = rooms.filter((room) => room.roomType === type);
-      setFilteredRooms(filtered);
-    }
-    setCurrentPage(1); // Reset to first page after filtering
-  };
-
-  // Pagination
   const indexOfLastRoom = currentPage * roomsPerPage;
   const indexOfFirstRoom = indexOfLastRoom - roomsPerPage;
   const currentRooms = filteredRooms.slice(indexOfFirstRoom, indexOfLastRoom);
 
-  // Change page
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   return (
-    <div className='my-12'>
-      <h2 className="text-center mb-5 text-teal-600">All Rooms</h2>
-      <div className='ml-20 mb-5'>
-        <label className="block font-bold text-teal-600 mb-2">Filter by Room Type:</label>
-        <select 
-          value={selectedRoomType} 
-          onChange={handleRoomTypeChange} 
-          className="w-auto p-2 border border-gray-300 rounded-md text-lg"
-        >
-          <option value="">All</option>
-          {roomTypes.map((type) => (
-            <option key={type} value={type}>
-              {type}
-            </option>
-          ))}
-        </select>
+    <motion.div 
+      initial={{ opacity: 0 }} 
+      animate={{ opacity: 1 }} 
+      transition={{ duration: 0.5 }}
+      className='my-12 px-4 md:px-8 lg:px-16'
+    >
+      <h2 className="text-center mb-8 text-4xl font-bold text-teal-600">Discover Our Rooms</h2>
+      
+      <div className='flex flex-col md:flex-row justify-between items-center mb-8'>
+        <div className='w-full md:w-1/3 mb-4 md:mb-0'>
+          <label className="block font-bold text-teal-600 mb-2">Filter by Room Type:</label>
+          <div className="relative">
+            <select 
+              value={selectedRoomType} 
+              onChange={handleRoomTypeChange} 
+              className="w-full p-3 border border-gray-300 rounded-md text-lg appearance-none"
+            >
+              <option value="">All Types</option>
+              {roomTypes.map((type) => (
+                <option key={type} value={type}>{type}</option>
+              ))}
+            </select>
+            <Filter className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+          </div>
+        </div>
+        
+        <div className='w-full md:w-2/3'>
+          <RoomSearch handleSearchResult={handleSearchResult} />
+        </div>
       </div>
       
-      <RoomSearch handleSearchResult={handleSearchResult} />
-      <RoomResult roomSearchResults={currentRooms} />
+      {isLoading ? (
+        <div className="flex justify-center items-center h-64">
+          <Loader className="animate-spin text-teal-600" size={48} />
+        </div>
+      ) : (
+        <motion.div 
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.5 }}
+        >
+          <RoomResult roomSearchResults={currentRooms} />
+        </motion.div>
+      )}
 
       <Pagination
         roomsPerPage={roomsPerPage}
@@ -94,7 +107,7 @@ const AllRoomsPage = () => {
         currentPage={currentPage}
         paginate={paginate}
       />
-    </div>
+    </motion.div>
   );
 };
 

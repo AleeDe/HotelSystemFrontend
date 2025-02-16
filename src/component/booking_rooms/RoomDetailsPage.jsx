@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import ApiService from '../../service/ApiService';
 import DatePicker from 'react-datepicker';
+import {toast} from "react-toastify"
 
 const RoomDetailsPage = () => {
   const navigate = useNavigate();
@@ -83,16 +84,26 @@ const RoomDetailsPage = () => {
       };
 
       const response = await ApiService.bookRoom(roomId, userId, booking);
-      if (response.statusCode === 200) {
+      
+      toast.success("Room Book Suuessful!");
+      if (response.statusCode === 201) {
         setConfirmationCode(response.bookingConfirmationCode);
         setShowMessage(true);
         setTimeout(() => {
           setShowMessage(false);
           navigate('/rooms');
-        }, 10000);
+        }, 2000);
       }
     } catch (error) {
-      setErrorMessage(error.response?.data?.message || error.message);
+      if(error.response && error.response.status === 404){
+                  toast.error("Room Already Book Selected Date!");
+                  }
+                  else if (error.response && error.response.status === 500){
+                    toast.error("check-in-Date smaller than check-out-date!");
+                  }
+                  else{
+                      toast.error("Network Error");
+                  }
       setTimeout(() => setErrorMessage(''), 5000);
     }
   };

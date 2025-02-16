@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import ApiService from '../../service/ApiService';
 
 const EditRoomPage = () => {
-    const { roomId } = useParams();
+    const { stringId } = useParams();
     const navigate = useNavigate();
     const [roomDetails, setRoomDetails] = useState({
         roomPhotoUrl: '',
@@ -19,7 +19,7 @@ const EditRoomPage = () => {
     useEffect(() => {
         const fetchRoomDetails = async () => {
             try {
-                const response = await ApiService.getRoomById(roomId);
+                const response = await ApiService.getRoomById(stringId);
                 setRoomDetails({
                     roomPhotoUrl: response.room.roomPhotoUrl,
                     roomType: response.room.roomType,
@@ -31,7 +31,7 @@ const EditRoomPage = () => {
             }
         };
         fetchRoomDetails();
-    }, [roomId]);
+    }, [stringId]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -63,7 +63,7 @@ const EditRoomPage = () => {
                 formData.append('photo', file);
             }
 
-            const result = await ApiService.updateRoom(roomId, formData);
+            const result = await ApiService.updateRoom(stringId, formData);
             if (result.statusCode === 200) {
                 setSuccess('Room updated successfully.');
                 
@@ -82,7 +82,7 @@ const EditRoomPage = () => {
     const handleDelete = async () => {
         if (window.confirm('Do you want to delete this room?')) {
             try {
-                const result = await ApiService.deleteRoom(roomId);
+                const result = await ApiService.deleteRoom(stringId);
                 if (result.statusCode === 200) {
                     setSuccess('Room Deleted successfully.');
                     

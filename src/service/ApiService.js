@@ -60,6 +60,12 @@ export default class ApiService {
         return response.data;
     }
 
+    static async getUserBookings(userId) {
+        const response = await axios.get(`${this.BASE_URL}/users/get-user-booking-history/${userId}`, {
+            headers: this.getHeaders()
+        })
+        return response.data
+    }
 
     // deleteUderById
 

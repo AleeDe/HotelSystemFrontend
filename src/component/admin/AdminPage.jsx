@@ -20,7 +20,7 @@ const AdminPage = () => {
     }, []);
 
     return (
-        <div className="max-w-3xl mx-auto my-12 p-5 bg-white rounded-lg shadow-lg text-center">
+        <div className="max-w-3xl mx-auto my-12 p-5 bg-white rounded-lg shadow-lg text-center min-h-screen">
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-teal-700 mb-5">
                 Welcome, {adminName}
             </h1>

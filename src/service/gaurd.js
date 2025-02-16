@@ -6,7 +6,7 @@ export const ProtectedRoute= ({element: Componet}) =>{
     const location = useLocation;
 
     return ApiService.isAuthenticated()?(
-        Comment
+        Componet
     ):(
         <Navigate to="/login" replace state={{from: location}}/>
     );
@@ -17,7 +17,7 @@ export const AdminRoute= ({element: Componet}) =>{
     const location = useLocation;
 
     return ApiService.isAdmin()?(
-        Comment
+        Componet
     ):(
         <Navigate to="/login" replace state={{from: location}}/>
     );
